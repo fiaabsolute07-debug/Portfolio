@@ -340,9 +340,11 @@ h1.split .ch.sp{width:.26em}
 .sk-list{margin-top:14px}
 .sk-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line);font-size:14px;color:var(--white)}
 .sk-list li small{display:block;font-size:12px;color:var(--text);margin-top:1px}
-.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:var(--gap);padding:16px 18px;border:1px solid var(--line);background:var(--surface)}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:var(--gap);padding:16px 18px;border:1px solid var(--line);background:var(--surface)}
 .tools > em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--dim);margin-right:8px}
-.tools span{font-size:12.5px;color:var(--white);border:1px solid var(--line-2);padding:4px 10px}
+.tool-app{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:7px 11px;border:1px solid var(--line-2);background:#fff;color:var(--white)}
+.tool-app .tool-mark{display:block;width:24px;height:24px;flex:none}
+.tools .tool-app span{font-size:12.5px;color:var(--white);border:0;padding:0}
 
 /* =====================================================================
    06 — GROWTH
@@ -771,7 +773,7 @@ h1.split .ch.sp{width:.26em}
       <ul class="sk-list">
         <li><div>AI images & video<small>90+ assets in 2 months</small></div><span class="src">Saint Gard</span></li>
         <li><div>Product visuals<small>~60 SKUs on the web store</small></div><span class="src">Saint Gard</span></li>
-        <li><div>Editing<small>Canva, Photoshop, CapCut</small></div><span class="src">Saint Gard</span></li>
+        <li><div>Editing<small>Canva, CapCut</small></div><span class="src">Saint Gard</span></li>
         <li><div>Copywriting<small>landing pages, campaign pages, email</small></div><span class="src">Spaca</span></li>
         <li><div>Market-analysis posts<small>309 published</small></div><span class="src">Nami</span></li>
       </ul>
@@ -790,7 +792,13 @@ h1.split .ch.sp{width:.26em}
 
   <div class="tools reveal" data-d="2">
     <em>tools</em>
-    <span>Meta Ads Manager</span><span>Google Sheets</span><span>Notion</span><span>Shopify</span><span>Claude</span><span>Google Flow</span><span>Canva</span><span>Photoshop</span><span>CapCut</span>
+    <div class="tool-app" aria-label="Meta Ads Manager"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 21c3.2-7.3 6.2-11 9-11 4 0 7.8 12 11.3 12 1.6 0 3-1.5 4.2-4" fill="none" stroke="#0866ff" stroke-width="4" stroke-linecap="round"/><path d="M4 17c1.5 3.3 3 5 4.6 5 3.5 0 7.3-12 11.3-12 2.5 0 5.3 3.3 8.1 9" fill="none" stroke="#0866ff" stroke-width="4" stroke-linecap="round"/></svg><span>Meta Ads</span></div>
+    <div class="tool-app" aria-label="Google Sheets"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="#188038" d="M7 3h13l7 7v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path fill="#34a853" d="M20 3v7h7z"/><path d="M10 14h13M10 19h13M10 24h13M15 14v10M20 14v10" fill="none" stroke="#fff" stroke-width="1.6"/></svg><span>Google Sheets</span></div>
+    <div class="tool-app" aria-label="Shopify"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="#95bf47" d="m7 10 18-2 2 20H5z"/><path d="M11 11c0-5 2.2-8 5.2-8 2.4 0 4 2.3 4 5.6" fill="none" stroke="#5e8e3e" stroke-width="2"/><path d="M19.8 15.2c-.8-.5-1.5-.7-2.2-.7-1.2 0-1.7.6-1.7 1.2 0 1.9 4.6 1.3 4.6 4.4 0 1.8-1.5 3.1-3.8 3.1-1.4 0-2.6-.4-3.5-1.1l.6-1.8c.9.6 1.8.9 2.7.9.9 0 1.4-.4 1.4-.9 0-1.7-4.5-1.4-4.5-4.4 0-1.9 1.7-3.3 4.1-3.3 1.2 0 2.3.3 3.1.8z" fill="#fff"/></svg><span>Shopify</span></div>
+    <div class="tool-app" aria-label="Claude"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><g stroke="#d97757" stroke-width="2.7" stroke-linecap="round"><path d="M16 3v5M16 24v5M3 16h5M24 16h5M6.8 6.8l3.6 3.6M21.6 21.6l3.6 3.6M25.2 6.8l-3.6 3.6M10.4 21.6l-3.6 3.6"/><path d="m11 5 1.7 4.6M20.7 22.4 22.5 27M5 11l4.6 1.7M22.4 20.7 27 22.5M27 11l-4.6 1.7M9.6 20.7 5 22.5M22.5 5l-1.8 4.6M9.3 22.4 7.5 27"/></g></svg><span>Claude</span></div>
+    <div class="tool-app" aria-label="Google Flow"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="#4285f4" d="M16 3 9 16h7z"/><path fill="#34a853" d="m16 3 7 13h-7z"/><path fill="#fbbc04" d="m9 16 7 13V16z"/><path fill="#ea4335" d="m23 16-7 13V16z"/></svg><span>Google Flow</span></div>
+    <div class="tool-app" aria-label="Canva"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="canvaMark" x1="0" x2="1" y1="1" y2="0"><stop stop-color="#00c4cc"/><stop offset=".52" stop-color="#7d2ae8"/><stop offset="1" stop-color="#00c4cc"/></linearGradient></defs><circle cx="16" cy="16" r="14" fill="url(#canvaMark)"/><path d="M21 10.5c-1.2-1.1-3.4-1.2-5.6-.2-3.2 1.4-5.2 4.4-4.7 7.1.4 2.2 2.5 3.2 4.7 2.3 1.1-.4 2-1.2 2.7-2.1" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round"/></svg><span>Canva</span></div>
+    <div class="tool-app" aria-label="CapCut"><svg class="tool-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 9h22M5 23h22M10 5l12 22M22 5 10 27" fill="none" stroke="#111827" stroke-width="3.2" stroke-linecap="round"/></svg><span>CapCut</span></div>
   </div>
 </section>
 
