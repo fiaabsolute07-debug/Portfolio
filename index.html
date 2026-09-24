@@ -265,6 +265,24 @@ h1.split .ch.sp{width:.26em}
 .proof-link{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--accent-2)}
 .proof-link:hover{text-decoration:underline}
 .proof-links{display:flex;flex-wrap:wrap;gap:4px 18px}
+.proof-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--line-2);background:var(--paper);color:var(--accent-2);font:inherit;font-size:14px;cursor:pointer}
+.proof-toggle:hover{border-color:var(--accent-2)}
+.proof-toggle:focus-visible,.proof-drawer a:focus-visible,.proof-drawer button:focus-visible{outline:2px solid var(--accent-2);outline-offset:4px}
+.proof-drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(600px,48vw);max-width:100vw;height:100dvh;max-height:100dvh;padding:0;border:0;border-left:1px solid var(--line);background:#f7f6f2;color:var(--white);overflow:auto;overscroll-behavior:contain;box-shadow:-16px 0 60px #0b133022}
+.proof-drawer::backdrop{background:#0b13304d}
+.proof-drawer[open]{animation:proofIn .25s ease-out}
+.proof-drawer-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 24px;background:#f7f6f2;border-bottom:1px solid var(--line)}
+.proof-drawer-head h2{font-size:22px}
+.proof-drawer-head button{padding:8px 12px;border:1px solid var(--line-2);font:inherit;cursor:pointer}
+.proof-drawer-body{padding:24px}
+.proof-drawer-body>.proof-links{margin-bottom:24px}
+.proof-figure{margin:0 0 26px;padding:0 0 24px;border-bottom:1px solid var(--line)}
+.proof-figure img{display:block;width:100%;height:auto;border:1px solid var(--line);background:#fff}
+.proof-figure figcaption{margin-top:12px;font-size:14px;line-height:1.5}
+.proof-figure .proof-links{gap:8px 18px}
+@keyframes proofIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+@media(max-width:700px){.proof-drawer{width:100vw}.proof-drawer-head,.proof-drawer-body{padding:18px}}
+@media(prefers-reduced-motion:reduce){.proof-drawer[open]{animation:none}}
 @media (max-width:1000px){.proj{grid-template-columns:1fr;row-gap:var(--gap)}}
 
 /* =====================================================================
@@ -526,6 +544,10 @@ h1.split .ch.sp{width:.26em}
 </div>
 
 <canvas id="gl"></canvas>
+<dialog class="proof-drawer" id="proofDrawer" aria-labelledby="proofTitle">
+  <header class="proof-drawer-head"><h2 id="proofTitle">Project proof</h2><button type="button" id="proofClose" aria-label="Close proof panel" autofocus>Close ✕</button></header>
+  <div class="proof-drawer-body" id="proofBody"></div>
+</dialog>
 <div class="wipe" id="wipe" aria-hidden="true"><i style="--k:0"></i><i style="--k:1"></i><i style="--k:2"></i><i style="--k:3"></i><i style="--k:4"></i></div>
 
 <nav id="nav">
@@ -1147,6 +1169,63 @@ hudPrev.addEventListener('click', () => step(-1));
 hudNext.addEventListener('click', () => step(1));
 go(location.hash.slice(1));
 
+/* ---------- project proof side panel ---------- */
+const proofDrawer = document.getElementById('proofDrawer');
+{
+  const body = document.getElementById('proofBody');
+  let opener = null, previousOverflow = '';
+  const makeLink = (href, label) => {
+    const a = document.createElement('a');
+    a.href = href; a.textContent = label; a.className = 'proof-link';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    return a;
+  };
+  document.querySelectorAll('.pc-proof').forEach(proof => {
+    const project = proof.closest('.pc').querySelector('h3').textContent;
+    const evidence = [...proof.querySelectorAll('[data-lb-src]')];
+    const projectLinks = [...proof.querySelectorAll('.proof-links a')];
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'proof-toggle';
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.setAttribute('aria-controls', 'proofDrawer');
+    button.setAttribute('aria-label', 'Show proof for ' + project);
+    button.innerHTML = '<span>Show proof</span><span aria-hidden="true">↗</span>';
+    proof.replaceChildren(button);
+    button.addEventListener('click', () => {
+      opener = button;
+      document.getElementById('proofTitle').textContent = project + ' · Proof';
+      body.replaceChildren();
+      if (projectLinks.length){
+        const links = document.createElement('div'); links.className = 'proof-links';
+        projectLinks.forEach(a => links.append(makeLink(a.href, a.textContent)));
+        body.append(links);
+      }
+      evidence.forEach(item => {
+        const figure = document.createElement('figure'); figure.className = 'proof-figure';
+        const img = document.createElement('img');
+        img.src = item.dataset.lbSrc; img.alt = item.dataset.lbCap; img.loading = 'lazy';
+        const caption = document.createElement('figcaption'); caption.textContent = item.dataset.lbCap;
+        const links = document.createElement('div'); links.className = 'proof-links';
+        links.append(makeLink(item.dataset.lbSrc, 'Open full image ↗'));
+        if (item.dataset.lbLink) links.append(makeLink(item.dataset.lbLink, 'View original post ↗'));
+        figure.append(img, caption, links); body.append(figure);
+      });
+      previousOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      proofDrawer.showModal(); proofDrawer.scrollTop = 0;
+    });
+  });
+  document.getElementById('proofClose').addEventListener('click', () => proofDrawer.close());
+  proofDrawer.addEventListener('click', e => {
+    const rect = proofDrawer.getBoundingClientRect();
+    if (e.target === proofDrawer && (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom)) proofDrawer.close();
+  });
+  proofDrawer.addEventListener('close', () => {
+    document.body.style.overflow = previousOverflow;
+    opener?.focus();
+  });
+}
+
 /* ---------- lightbox ---------- */
 const lb = document.getElementById('lb');
 {
@@ -1203,6 +1282,7 @@ const lb = document.getElementById('lb');
   document.getElementById('lbNext').addEventListener('click', () => move(1));
   lb.addEventListener('click', e => { if(e.target === lb) closeLb(); });
   addEventListener('keydown', e => {
+    if (proofDrawer.open) return;
     if (lb.classList.contains('open')){
       if(e.key === 'Escape') closeLb();
       if(e.key === 'ArrowLeft') move(-1);
