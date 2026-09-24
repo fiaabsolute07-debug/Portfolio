@@ -281,6 +281,15 @@ h1.split .ch.sp{width:.26em}
 .proof-figure img{display:block;width:100%;height:auto;border:1px solid var(--line);background:#fff}
 .proof-figure figcaption{margin-top:12px;font-size:14px;line-height:1.5}
 .proof-figure .proof-links{gap:8px 18px}
+.proof-switch{display:flex;gap:8px;margin-bottom:18px}
+.proof-switch button{flex:1;padding:10px;border:1px solid var(--line-2);font:inherit;font-size:13px;cursor:pointer}
+.proof-switch button[aria-pressed="true"]{background:var(--white);color:var(--paper)}
+.spaca-site{display:block;padding:24px;border:1px solid var(--line-2);background:#0b0c0a;color:#fff}
+.spaca-site img{width:48px;height:48px;margin-bottom:20px}
+.spaca-site strong{display:block;font-size:24px;margin-bottom:10px}
+.spaca-site p{color:#d6d8d0;font-size:14px;line-height:1.6;margin-bottom:24px}
+.spaca-site span{display:block;color:#d4f552;font-size:13px}
+.spaca-x-status{font-size:13px;color:var(--text);margin:16px 0}
 @keyframes proofIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1000px){.proof-drawer{max-height:100dvh}.proof-drawer-head,.proof-drawer-body{padding:18px}}
 @media(prefers-reduced-motion:reduce){.proof-drawer[open]{animation:none}}
@@ -725,13 +734,8 @@ h1.split .ch.sp{width:.26em}
       </ol></div>
       <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>positioning · landing pages · waitlist · welcome email · SEO · UTM tracking</p></div>
       <div class="pc-proof">
-        <div class="thumbs" data-gallery>
-        <a href="#" data-lb-src="spaca-1.jpg" data-lb-cap="Spaca — landing page"><img src="spaca-1.jpg" alt="Spaca landing page" loading="lazy"></a>
-        <a href="#" data-lb-src="spaca-2.jpg" data-lb-cap="Spaca — 7 ready-made campaign types"><img src="spaca-2.jpg" alt="Spaca campaign types" loading="lazy"></a>
-        <a href="#" data-lb-src="spaca-3.jpg" data-lb-cap="Spaca — launch campaign page"><img src="spaca-3.jpg" alt="Spaca launch campaign page" loading="lazy"></a>
-        <a href="#" data-lb-src="spaca-4.jpg" data-lb-cap="Spaca — waitlist split by project / creator"><img src="spaca-4.jpg" alt="Spaca waitlist" loading="lazy"></a>
-      </div>
-        <div class="proof-links"><a class="proof-link" href="https://www.spaca.xyz" target="_blank" rel="noopener">spaca.xyz ↗</a><a class="proof-link" href="https://x.com/Spaca_xyz" target="_blank" rel="noopener">X · @Spaca_xyz ↗</a></div>
+        <a class="spaca-site" href="https://www.spaca.xyz" target="_blank" rel="noopener noreferrer"><img src="spaca-logo.svg" alt="Spaca"><strong>spaca.xyz</strong><p>A marketplace connecting Web3 teams with creators on X.</p><span>Visit website ↗</span></a>
+        <div class="proof-links"><a class="proof-link" href="https://x.com/Spaca_xyz" target="_blank" rel="noopener noreferrer">X · @Spaca_xyz ↗</a></div>
       </div>
     </article>
 
@@ -1197,6 +1201,65 @@ const proofDrawer = document.getElementById('proofDrawer');
     a.target = '_blank'; a.rel = 'noopener noreferrer';
     return a;
   };
+  let xScriptPromise;
+  function loadXWidgets(){
+    if (window.twttr?.widgets) return Promise.resolve(window.twttr);
+    if (!xScriptPromise){
+      xScriptPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://platform.twitter.com/widgets.js'; script.async = true;
+        script.onload = () => {
+          if (window.twttr?.widgets) resolve(window.twttr);
+          else if (window.twttr?.ready) window.twttr.ready(resolve);
+          else reject(new Error('X unavailable'));
+        };
+        script.onerror = () => reject(new Error('X unavailable'));
+        document.head.append(script);
+      });
+    }
+    return xScriptPromise;
+  }
+  function showSpaca(){
+    const switcher = document.createElement('div'); switcher.className = 'proof-switch';
+    const websiteButton = document.createElement('button'); websiteButton.type = 'button'; websiteButton.textContent = 'Website';
+    const xButton = document.createElement('button'); xButton.type = 'button'; xButton.textContent = 'X · @Spaca_xyz';
+    switcher.append(websiteButton, xButton);
+    const website = document.createElement('div');
+    const siteLink = makeLink('https://www.spaca.xyz', ''); siteLink.className = 'spaca-site';
+    siteLink.innerHTML = '<img src="spaca-logo.svg" alt="Spaca"><strong>spaca.xyz</strong><p>A marketplace connecting Web3 teams with creators on X. Explore campaign types and join the early-access waitlist.</p><span>Visit website ↗</span>';
+    website.append(siteLink);
+    const feed = document.createElement('div'); feed.hidden = true;
+    feed.append(makeLink('https://x.com/Spaca_xyz', 'Open @Spaca_xyz on X ↗'));
+    const status = document.createElement('p'); status.className = 'spaca-x-status'; status.setAttribute('role', 'status');
+    const timeline = document.createElement('div');
+    feed.append(status, timeline); body.append(switcher, website, feed);
+    let requested = false;
+    const select = isX => {
+      website.hidden = isX; feed.hidden = !isX;
+      websiteButton.setAttribute('aria-pressed', String(!isX)); xButton.setAttribute('aria-pressed', String(isX));
+    };
+    websiteButton.addEventListener('click', () => select(false));
+    xButton.addEventListener('click', async () => {
+      select(true);
+      if (requested) return;
+      requested = true; status.textContent = 'Loading posts from @Spaca_xyz…';
+      let timer;
+      try {
+        const result = await Promise.race([
+          loadXWidgets()
+            .then(x => timeline.isConnected ? x.widgets.createTimeline({sourceType:'profile',screenName:'Spaca_xyz'}, timeline, {height:500,theme:'light',dnt:true}) : null)
+            .then(result => { if (result) status.textContent = ''; return result; }),
+          new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('X timeout')), 12000); })
+        ]);
+        if (!result) throw new Error('X unavailable');
+        status.textContent = '';
+      } catch (error) {
+        console.warn('Spaca X embed did not load:', error);
+        status.textContent = 'The X feed could not load. View the posts directly on X using the link above.';
+      } finally { clearTimeout(timer); }
+    });
+    select(false);
+  }
   document.querySelectorAll('.pc-proof').forEach(proof => {
     const project = proof.closest('.pc').querySelector('h3').textContent;
     const evidence = [...proof.querySelectorAll('[data-lb-src]')];
@@ -1215,12 +1278,13 @@ const proofDrawer = document.getElementById('proofDrawer');
       card.classList.add('proof-active');
       document.getElementById('proofTitle').textContent = project + ' · Proof';
       body.replaceChildren();
-      if (projectLinks.length){
+      if (project === 'Spaca') showSpaca();
+      if (project !== 'Spaca' && projectLinks.length){
         const links = document.createElement('div'); links.className = 'proof-links';
         projectLinks.forEach(a => links.append(makeLink(a.href, a.textContent)));
         body.append(links);
       }
-      evidence.forEach(item => {
+      (project === 'Spaca' ? [] : evidence).forEach(item => {
         const figure = document.createElement('figure'); figure.className = 'proof-figure';
         const img = document.createElement('img');
         img.src = item.dataset.lbSrc; img.alt = item.dataset.lbCap; img.loading = 'lazy';
