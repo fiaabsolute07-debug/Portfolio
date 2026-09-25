@@ -264,8 +264,26 @@ h1.split .ch.sp{width:.26em}
 .proof-link{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--accent-2)}
 .proof-link:hover{text-decoration:underline}
 .proof-links{display:flex;flex-wrap:wrap;gap:4px 18px}
-.proof-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--line-2);background:var(--paper);color:var(--accent-2);font:inherit;font-size:14px;cursor:pointer}
-.proof-toggle:hover{border-color:var(--accent-2)}
+/* show-proof button: a peek at the real files, what's inside, and a clear way in */
+.proof-toggle{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;width:100%;padding:10px 12px;border:1px solid var(--accent);background:var(--accent);color:#fff;font:inherit;text-align:left;cursor:pointer;transition:background .3s,box-shadow .3s}
+.proof-toggle:hover{background:#1f58e0;box-shadow:0 12px 28px -14px rgba(27,63,209,.8)}
+.pt-peek{flex:none;display:flex;padding:4px 2px 4px 4px}
+.pt-peek i{display:block;width:42px;height:32px;margin-left:-14px;border:2px solid #fff;background:var(--deep);overflow:hidden;box-shadow:0 4px 10px rgba(2,24,110,.35);rotate:calc((var(--k) - 1) * 8deg);transition:rotate .45s var(--ease),translate .45s var(--ease)}
+.pt-peek i:first-child{margin-left:0}
+.pt-peek img{width:100%;height:100%;object-fit:cover;object-position:top}
+.pt-peek i.x{display:grid;place-items:center;color:#fff}
+.pt-peek i.x svg{width:14px;height:14px;fill:currentColor}
+.proof-toggle:hover .pt-peek i{rotate:calc((var(--k) - 1) * 14deg);translate:calc((var(--k) - 1) * 7px) -3px}
+.pt-text{flex:1;min-width:0;display:grid;gap:1px}
+.pt-text b{font-size:14.5px;font-weight:600;color:#fff}
+.pt-text small{font-size:12px;line-height:1.35;color:rgba(255,255,255,.8)}
+.pt-go{flex:none;display:grid;place-items:center;width:30px;height:30px;background:#fff;color:var(--accent);font-size:15px;transition:transform .3s var(--ease)}
+.proof-toggle:hover .pt-go{transform:translateX(3px)}
+/* a shine crosses it once the card has come in, and again on hover */
+.proof-toggle::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);pointer-events:none}
+.page.active .proj.in .proof-toggle::after{animation:sweep 2.4s ease-in-out 1.5s backwards}
+.proof-toggle:hover::after{translate:500% 0;transition:translate .8s ease-in-out}
+@media (prefers-reduced-motion:reduce){.proof-toggle::after{display:none}.pt-peek i{transition:none}}
 .proof-toggle:focus-visible,.proof-drawer a:focus-visible,.proof-drawer button:focus-visible{outline:2px solid var(--accent-2);outline-offset:4px}
 .proof-drawer{position:fixed;inset:auto;margin:0;box-sizing:border-box;max-width:100vw;max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--line-2);background:#f7f6f2;color:var(--white);overflow:auto;overscroll-behavior:contain;box-shadow:0 12px 40px #0b133026}
 .proof-drawer::backdrop{background:transparent}
@@ -289,6 +307,7 @@ h1.split .ch.sp{width:.26em}
 .proof-x-post:hover{border-color:var(--accent-2)}
 .proof-x-post small{font-family:var(--mono);font-size:11px;color:var(--dim)}
 .proof-x-post em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;color:var(--accent-2)}
+.pc-proof{display:grid}
 .pc-proof .proof-x{gap:6px}
 .proof-site{display:block;border:1px solid var(--line-2);background:#fff;transition:border-color .25s}
 .proof-site:hover{border-color:var(--accent-2)}
@@ -705,7 +724,7 @@ h1.split .ch.sp{width:.26em}
         <li><b>40+</b><span>A/B tests, budget moved to winners</span></li>
       </ol></div>
       <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>Meta Ads budget · creatives · A/B tests · reports · product visuals</p></div>
-      <div class="pc-proof">
+      <div class="pc-proof" data-peek="9 screenshots: live creatives, Ads Manager, AI workflow">
         <div class="thumbs" data-gallery>
         <a href="#" data-lb-src="sg-1.jpg" data-lb-cap="Saint Gard — live creative: leather texture" data-lb-link="https://www.facebook.com/saintgardvn/posts/pfbid0ALvMegoJmuQBZFmMRVM4qrAPX4AN7d36VRbpGEQke5WHtsC1yrq5jDBt8co3qcUgl"><img src="sg-1.jpg" alt="Saint Gard creative — leather texture" loading="lazy"></a>
         <a href="#" data-lb-src="sg-2.jpg" data-lb-cap="Saint Gard — live creative: beach editorial" data-lb-link="https://www.facebook.com/saintgardvn/posts/pfbid02ufqvWrMK8RVE67QxjoAS33cntnio7Nr2TpaKB8VuzDZ3g9Z8mocpBQ8FRASD4oRDl"><img src="sg-2.jpg" alt="Saint Gard creative — beach editorial" loading="lazy"></a>
@@ -737,7 +756,7 @@ h1.split .ch.sp{width:.26em}
         <li><b>0 ₫</b><span>on ads, first referrals from my network</span></li>
       </ol></div>
       <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>referrals · community posts · market analysis</p></div>
-      <div class="pc-proof">
+      <div class="pc-proof" data-peek="3 of my 309 analysis posts">
         <div class="thumbs" data-gallery>
         <a href="#" data-lb-src="nami-1.jpg" data-lb-cap="Nami — post: DePIN ecosystem analysis"><img src="nami-1.jpg" alt="Nami post — DePIN analysis" loading="lazy"></a>
         <a href="#" data-lb-src="nami-2.jpg" data-lb-cap="Nami — post: BTC cycle analysis"><img src="nami-2.jpg" alt="Nami post — BTC cycle" loading="lazy"></a>
@@ -763,7 +782,7 @@ h1.split .ch.sp{width:.26em}
         <li><b>8+</b><span>signups</span></li>
       </ol></div>
       <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>positioning · landing pages · waitlist · welcome email · SEO · UTM tracking</p></div>
-      <div class="pc-proof">
+      <div class="pc-proof" data-peek="3 posts on X, plus the live site">
         <!-- proof panel: these X posts first (embedded live, the links stay if X can't load), then the website block -->
         <div class="proof-x" data-x="Spaca_xyz">
           <a class="proof-x-post" href="https://x.com/Spaca_xyz/status/2103048443375874489" target="_blank" rel="noopener"><span>turn your X into an asset<br>you check charts all day. gold, btc, your bags…<br>the account you've built on X is an asset too</span><small>24 Sep 2026</small><em>View on X ↗</em></a>
@@ -1385,8 +1404,25 @@ const proofDrawer = document.getElementById('proofDrawer');
     button.type = 'button'; button.className = 'proof-toggle';
     button.setAttribute('aria-haspopup', 'dialog');
     button.setAttribute('aria-controls', 'proofDrawer');
-    button.setAttribute('aria-label', 'Show proof for ' + project);
-    button.innerHTML = '<span>Show proof</span><span aria-hidden="true">↗</span>';
+    button.setAttribute('aria-label', 'See the proof for ' + project);
+    /* a peek at up to three of the real files: screenshots, an X tile for posts on X, the site */
+    const shots = evidence.map(a => a.dataset.lbSrc);
+    if (xBlock) shots.unshift(null);
+    if (site) shots.push(site.querySelector('img').getAttribute('src'));
+    const peek = document.createElement('span'); peek.className = 'pt-peek';
+    shots.slice(0, 3).forEach((src, k) => {
+      const tile = document.createElement('i'); tile.style.setProperty('--k', k);
+      if (src){ const img = document.createElement('img'); img.src = src; img.alt = ''; img.loading = 'lazy'; tile.append(img); }
+      else { tile.className = 'x'; tile.innerHTML = '<svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7.2 8.2L23 22h-6.6l-5.2-6.8L5.2 22H2l7.7-8.8L1.5 2h6.8l4.7 6.2zm-1.2 18h1.8L7.4 3.9H5.5z"/></svg>'; }
+      peek.append(tile);
+    });
+    const text = document.createElement('span'); text.className = 'pt-text';
+    const label = document.createElement('b'); label.textContent = 'See the proof';
+    const teaser = document.createElement('small'); teaser.textContent = proof.dataset.peek || '';
+    text.append(label, teaser);
+    const go = document.createElement('span'); go.className = 'pt-go'; go.textContent = '→';
+    [peek, go].forEach(el => el.setAttribute('aria-hidden', 'true'));
+    button.append(peek, text, go);
     proof.replaceChildren(button);
     button.addEventListener('click', () => {
       opener = button;
