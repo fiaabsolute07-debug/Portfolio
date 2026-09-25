@@ -408,6 +408,26 @@ h1.split .ch.sp{width:.26em}
 .steps p{font-size:13px;line-height:1.4}
 
 /* =====================================================================
+   LIFE — a messy pile flies apart: event photos to the corners, run + gym in the middle, then all float like hung posters
+   ===================================================================== */
+/* without JS the photos sit in a plain grid */
+.scatter{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--gap)}
+.snap{display:block;padding:8px 8px 0;border:1px solid var(--line-2);background:var(--surface);box-shadow:0 12px 30px -18px rgba(11,19,48,.5);cursor:zoom-in}
+.snap img,.snap video{display:block;width:100%;height:auto}
+.snap.clip{cursor:default}
+.snap span{display:block;padding:7px 2px 8px;font-family:var(--mono);font-size:11px;line-height:1.3;color:var(--dim);transition:color .25s}
+.snap:hover span{color:var(--accent-2)}
+.scatter.on{position:relative;display:block;height:var(--h)}
+/* place and tilt ride on translate/rotate, so the float can own transform */
+.scatter.on .snap{position:absolute;left:0;top:0;width:var(--w);z-index:var(--z);translate:var(--x) var(--y);rotate:var(--r);transition:translate .9s cubic-bezier(.2,1.2,.35,1),rotate .9s cubic-bezier(.2,1.2,.35,1),scale .9s cubic-bezier(.2,1.2,.35,1),box-shadow .3s;animation:drift var(--dur) ease-in-out var(--del) infinite alternate}
+/* the pile: all four heaped in the middle at odd angles */
+.scatter.on.pile .snap{translate:var(--px) var(--py);rotate:var(--pr);scale:var(--ps);transition:none}
+.scatter.on.shoot .snap{transition-delay:calc(.85s + var(--i) * 80ms)}
+@keyframes drift{to{transform:translate(var(--fx),var(--fy)) rotate(var(--fr))}}
+@media (hover:hover){.scatter.on .snap:hover,.scatter.on .snap:focus-visible{z-index:9;rotate:0deg;scale:1.04;transition-duration:.45s;box-shadow:0 24px 44px -20px rgba(11,19,48,.55)}}
+@media (prefers-reduced-motion:reduce){.scatter.on .snap{animation:none}}
+
+/* =====================================================================
    07 — HOW I WORK + CONTACT
    ===================================================================== */
 .last{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:var(--gap);align-items:start}
@@ -576,7 +596,8 @@ h1.split .ch.sp{width:.26em}
     <a href="#work"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V4h8v3"/><path d="M3 13h18"/></svg><i>02</i><span class="l">Work</span></a>
     <a href="#skills"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5z"/><path d="m2 13 10 5 10-5"/></svg><i>03</i><span class="l">Skills</span></a>
     <a href="#growth"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg><i>04</i><span class="l">Growth</span></a>
-    <a href="#contact"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 6 9 7 9-7"/></svg><i>05</i><span class="l">Contact</span></a>
+    <a href="#life"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg><i>05</i><span class="l">Life</span></a>
+    <a href="#contact"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 6 9 7 9-7"/></svg><i>06</i><span class="l">Contact</span></a>
   </div>
   <a class="badge" href="mailto:hoangphi.jobs@gmail.com">hoangphi.jobs@gmail.com</a>
 </nav>
@@ -584,7 +605,7 @@ h1.split .ch.sp{width:.26em}
 <div class="hud" id="hud">
   <span class="hud-prog" aria-hidden="true"><i id="hudProg"></i></span>
   <button id="hudPrev" aria-label="previous page">‹</button>
-  <div class="hud-mid"><span>p.<b id="hudNum">01</b>/05</span><span class="hud-beat" id="hudBeat" aria-hidden="true"><i style="--i:0"></i><i style="--i:2"></i><i style="--i:1"></i><i style="--i:3"></i></span><span id="hudName">intro</span></div>
+  <div class="hud-mid"><span>p.<b id="hudNum">01</b>/06</span><span class="hud-beat" id="hudBeat" aria-hidden="true"><i style="--i:0"></i><i style="--i:2"></i><i style="--i:1"></i><i style="--i:3"></i></span><span id="hudName">intro</span></div>
   <button id="hudNext" aria-label="next page">›</button>
 </div>
 
@@ -861,7 +882,26 @@ h1.split .ch.sp{width:.26em}
 </section>
 
 <!-- =====================================================================
-     PAGE 05 — HOW I WORK + CONTACT
+     PAGE 05 — LIFE : what I do outside work
+     ===================================================================== -->
+<section class="page" id="life" data-name="life" data-title="What do I do outside work?">
+  <header class="page-head reveal">
+    <h2>What do I do outside work?</h2>
+    <p class="point">Community events and meetups, the gym, and running.</p>
+  </header>
+
+  <div class="scatter reveal" data-d="1" data-gallery>
+    <a href="#" class="snap" data-lb-src="ev-1.webp" data-lb-cap="Gmonad — community event"><img src="ev-1.webp" alt="Group photo at a Gmonad community event" width="1280" height="720" loading="lazy"><span>Gmonad</span></a>
+    <a href="#" class="snap" data-lb-src="ev-2.webp" data-lb-cap="Arc — meetup"><img src="ev-2.webp" alt="Group photo at an Arc meetup" width="1280" height="853" loading="lazy"><span>Arc meetup</span></a>
+    <a href="#" class="snap" data-lb-src="ev-3.webp" data-lb-cap="Architects — meetup"><img src="ev-3.webp" alt="Group photo at an Architects meetup" width="1280" height="853" loading="lazy"><span>Architects meetup</span></a>
+    <a href="#" class="snap" data-lb-src="ev-4.webp" data-lb-cap="TRON — booth at Conviction 2026"><img src="ev-4.webp" alt="Crowd at the TRON booth at Conviction 2026" width="2000" height="1213" loading="lazy"><span>TRON booth · Conviction 2026</span></a>
+    <a href="#" class="snap mid" data-lb-src="life-run.png" data-lb-cap="Running — 5.05 km at 7:25 /km, 37m 27s"><img src="life-run.png" alt="Strava summary of a run: 5.05 km at 7:25 per km, 37 minutes 27 seconds" width="752" height="1360" loading="lazy"><span>Running · 5.05 km</span></a>
+    <figure class="snap mid clip"><video src="life-gym.mp4" poster="life-gym.jpg" width="360" height="640" muted loop playsinline preload="none" aria-label="Short clip of me training at the gym"></video><span>Gym</span></figure>
+  </div>
+</section>
+
+<!-- =====================================================================
+     PAGE 06 — HOW I WORK + CONTACT
      ===================================================================== -->
 <section class="page" id="contact" data-name="contact" data-title="How do I work, and how do you reach me?">
   <header class="page-head reveal">
@@ -1120,6 +1160,86 @@ function typeTitle(){
   });
 }
 
+/* ---------- life: a messy pile flies apart, event photos to the corners, run + gym in the middle, then they float ---------- */
+const scatter = document.querySelector('.scatter');
+const clip = scatter.querySelector('video');
+if (reduce) clip.controls = true;
+/* the gym clip only plays while this page is open */
+function lifeClip(on){ if (reduce) return; if (on) clip.play().catch(() => {}); else clip.pause(); }
+let scatterW = 0;
+function scatterPhotos(shoot){
+  const W = scatter.clientWidth;
+  if (!W) return;
+  scatterW = W;
+  const cards = [...scatter.children];
+  const corner = cards.filter(c => !c.classList.contains('mid'));
+  const mid = cards.filter(c => c.classList.contains('mid'));
+  const narrow = W < 700;
+  const w = Math.round(narrow ? (W - 10) / 2 : Math.min(420, W * .36));
+  /* the tall posters go in the gap between the corner columns, or in a row of their own when that gap is too thin */
+  const inline = W - 2 * w >= 300;
+  const mw = Math.round(inline ? Math.min(180, (W - 2 * w - 28) / 2) : narrow ? w : Math.min(240, w * .8));
+  corner.forEach(c => c.style.setProperty('--w', w + 'px'));
+  mid.forEach(c => c.style.setProperty('--w', mw + 'px'));
+  scatter.classList.add('on');
+  const hs = new Map(cards.map(c => [c, c.offsetHeight]));
+  const ch = Math.max(...corner.map(c => hs.get(c))), mh = Math.max(...mid.map(c => hs.get(c)));
+  const gapY = narrow ? 10 : 20;
+  const H = inline ? Math.max(ch * 2 + gapY, mh + 60) : ch * 2 + mh + gapY * 2;
+  scatter.style.setProperty('--h', H + 'px');
+  const tilt = narrow ? 5 : 8, nudgeX = narrow ? 4 : 24, nudgeY = narrow ? 3 : 8;
+  const sway = narrow ? .6 : 1;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  /* which photo lands in which corner, and which poster goes left, changes every visit */
+  const corners = [[0, 0], [1, 0], [0, 1], [1, 1]].sort(() => Math.random() - .5);
+  const midGap = narrow ? 10 : 16, midX = (W - (mid.length * mw + (mid.length - 1) * midGap)) / 2;
+  const lift = Math.random() < .5 ? 1 : -1;
+  const spots = new Map();
+  corner.forEach((c, k) => {
+    const [right, bottom] = corners[k % 4];
+    spots.set(c, {
+      x: right ? W - w - Math.random() * nudgeX : Math.random() * nudgeX,
+      y: bottom ? H - hs.get(c) - Math.random() * nudgeY : Math.random() * nudgeY
+    });
+  });
+  mid.sort(() => Math.random() - .5).forEach((c, j) => spots.set(c, {
+    x: midX + j * (mw + midGap),
+    /* side by side, one a little higher than the other */
+    y: inline ? (H - hs.get(c)) / 2 + (j ? lift : -lift) * rand(10, 30) : ch + gapY + Math.random() * nudgeY
+  }));
+  [...corner, ...mid].forEach((c, k) => {
+    const cw = mid.includes(c) ? mw : w, h = hs.get(c), {x, y} = spots.get(c);
+    Object.entries({
+      /* where it lands */
+      '--x': x.toFixed(1) + 'px',
+      '--y': y.toFixed(1) + 'px',
+      '--r': rand(-tilt, tilt).toFixed(1) + 'deg',
+      /* where it sits in the pile */
+      '--px': ((W - cw) / 2 + rand(-.07, .07) * W).toFixed(1) + 'px',
+      '--py': ((H - h) / 2 + rand(-.08, .08) * H).toFixed(1) + 'px',
+      '--pr': rand(-28, 28).toFixed(1) + 'deg',
+      '--ps': narrow ? .85 : .7,
+      /* its own slow float, out of step with the others */
+      '--fx': (rand(-8, 8) * sway).toFixed(1) + 'px',
+      '--fy': (rand(-16, -8) * sway).toFixed(1) + 'px',
+      '--fr': (rand(-2.5, 2.5) * sway).toFixed(2) + 'deg',
+      '--dur': rand(3.5, 6).toFixed(2) + 's',
+      '--del': rand(-6, 0).toFixed(2) + 's',
+      '--z': k + 1,
+      '--i': k
+    }).forEach(([key, v]) => c.style.setProperty(key, v));
+  });
+  if (!shoot || reduce) return;
+  /* start as the pile, hold it a beat, then let it fly */
+  scatter.classList.remove('shoot');
+  scatter.classList.add('pile');
+  void scatter.offsetWidth;
+  scatter.classList.replace('pile', 'shoot');
+  clearTimeout(scatter._t);
+  scatter._t = setTimeout(() => scatter.classList.remove('shoot'), 2400);
+}
+addEventListener('resize', () => { if (scatter.clientWidth && scatter.clientWidth !== scatterW) scatterPhotos(false); });
+
 /* ============================================================
    PAGER — one page at a time, hash routed (#work, #skills …)
    ============================================================ */
@@ -1168,6 +1288,8 @@ function show(i){
   moveInk();
   const hud = document.getElementById('hud'); hud.classList.remove('drop'); void hud.offsetWidth; hud.classList.add('drop'); clearTimeout(hud._drop); hud._drop = setTimeout(() => hud.classList.remove('drop'), 500);
   if (i === 0) typeTitle();
+  if (pages[i].contains(scatter)) scatterPhotos(true);
+  lifeClip(pages[i].contains(scatter));
   tabLinks[i].scrollIntoView({block:'nearest', inline:'center'});
   window.scrollTo({top:0, behavior:'instant'});
 }
