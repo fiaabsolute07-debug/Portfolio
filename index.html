@@ -284,9 +284,13 @@ h1.split .ch.sp{width:.26em}
 .proof-sec{margin:0 0 26px}
 .proof-sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;color:var(--dim)}
 .proof-sec-head .proof-link{margin:0;font-family:var(--sans);letter-spacing:0}
-.proof-x-feed{min-height:120px;border:1px solid var(--line);background:#fff}
-.proof-x-note{padding:16px;font-size:13.5px;line-height:1.5;color:var(--text)}
-.proof-x-note .proof-link{margin:0}
+.proof-x,.proof-x-posts{display:grid;gap:12px}
+.proof-x-slot .twitter-tweet{margin:0 auto!important}
+.proof-x-post{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 14px;border:1px solid var(--line-2);background:#fff;font-size:13.5px;color:var(--white);transition:border-color .25s}
+.proof-x-post:hover{border-color:var(--accent-2)}
+.proof-x-post small{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.proof-x-post em{grid-column:2;grid-row:1/3;align-self:center;font-style:normal;color:var(--accent-2)}
+.pc-proof .proof-x{gap:6px}
 .proof-site{display:block;border:1px solid var(--line-2);background:#fff;transition:border-color .25s}
 .proof-site:hover{border-color:var(--accent-2)}
 .proof-site-bar{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface-2)}
@@ -740,8 +744,12 @@ h1.split .ch.sp{width:.26em}
       </ol></div>
       <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>positioning · landing pages · waitlist · welcome email · SEO · UTM tracking</p></div>
       <div class="pc-proof">
-        <!-- proof panel: live posts from this X profile first, then the website block -->
-        <a class="proof-link proof-x" href="https://x.com/Spaca_xyz" data-x="Spaca_xyz" target="_blank" rel="noopener">X · @Spaca_xyz ↗</a>
+        <!-- proof panel: these X posts first (embedded live, the links stay if X can't load), then the website block -->
+        <div class="proof-x" data-x="Spaca_xyz">
+          <a class="proof-x-post" href="https://x.com/Spaca_xyz/status/2103048443375874489" target="_blank" rel="noopener"><span>Spaca · @Spaca_xyz</span><small>24 Sep 2026</small><em>View on X ↗</em></a>
+          <a class="proof-x-post" href="https://x.com/Spaca_xyz/status/2103111847708864962" target="_blank" rel="noopener"><span>Spaca · @Spaca_xyz</span><small>24 Sep 2026</small><em>View on X ↗</em></a>
+          <a class="proof-x-post" href="https://x.com/Spaca_xyz/status/2102945219729920510" target="_blank" rel="noopener"><span>Spaca · @Spaca_xyz</span><small>24 Sep 2026</small><em>View on X ↗</em></a>
+        </div>
         <a class="proof-site" href="https://www.spaca.xyz" target="_blank" rel="noopener">
           <span class="proof-site-bar" aria-hidden="true"><i></i><i></i><i></i><span>spaca.xyz</span></span>
           <img src="spaca-1.jpg" alt="Spaca landing page" loading="lazy">
@@ -1231,26 +1239,28 @@ const proofDrawer = document.getElementById('proofDrawer');
     sec.append(head, content);
     return sec;
   };
-  function xFeed(handle, href){
-    const feed = document.createElement('div'); feed.className = 'proof-x-feed';
-    const note = document.createElement('p'); note.className = 'proof-x-note';
-    note.textContent = 'Loading posts from X…';
-    feed.append(note);
-    const fail = () => { if (note.isConnected) note.replaceChildren('Posts could not load here. ', makeLink(href, 'Open @' + handle + ' on X ↗')); };
-    const timer = setTimeout(fail, 10000);
-    loadX()
-      .then(twttr => twttr.widgets.createTimeline(
-        { sourceType: 'profile', screenName: handle }, feed,
-        { height: 480, dnt: true, theme: 'light', chrome: 'noheader nofooter noborders transparent' }))
-      .then(el => { if (!el) throw 0; clearTimeout(timer); note.remove(); })
-      .catch(() => { clearTimeout(timer); fail(); });
-    return section('on X', makeLink(href, '@' + handle + ' ↗'), feed);
+  function xPosts(block){
+    const handle = block.dataset.x;
+    const list = document.createElement('div'); list.className = 'proof-x-posts';
+    block.querySelectorAll('.proof-x-post').forEach(link => {
+      const slot = document.createElement('div'); slot.className = 'proof-x-slot';
+      const embed = document.createElement('div');
+      // the link card shows until X renders the post, and stays if it never does
+      const card = link.cloneNode(true);
+      slot.append(embed, card); list.append(slot);
+      loadX()
+        .then(twttr => twttr.widgets.createTweet(link.href.match(/status\/(\d+)/)[1], embed,
+          { dnt: true, theme: 'light', conversation: 'none', align: 'center' }))
+        .then(el => { if (el) card.remove(); })
+        .catch(() => {});
+    });
+    return section('on X', makeLink('https://x.com/' + handle, '@' + handle + ' ↗'), list);
   }
   document.querySelectorAll('.pc-proof').forEach(proof => {
     const project = proof.closest('.pc').querySelector('h3').textContent;
     const evidence = [...proof.querySelectorAll('[data-lb-src]')];
     const projectLinks = [...proof.querySelectorAll('.proof-links a')];
-    const xLink = proof.querySelector('[data-x]');
+    const xBlock = proof.querySelector('.proof-x');
     const site = proof.querySelector('.proof-site');
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'proof-toggle';
@@ -1271,7 +1281,7 @@ const proofDrawer = document.getElementById('proofDrawer');
         projectLinks.forEach(a => links.append(makeLink(a.href, a.textContent)));
         body.append(links);
       }
-      if (xLink) body.append(xFeed(xLink.dataset.x, xLink.href));
+      if (xBlock) body.append(xPosts(xBlock));
       if (site) body.append(section('website', null, site.cloneNode(true)));
       evidence.forEach(item => {
         const figure = document.createElement('figure'); figure.className = 'proof-figure';
