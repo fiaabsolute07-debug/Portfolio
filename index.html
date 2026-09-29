@@ -62,6 +62,8 @@ main{position:relative;z-index:1}
 .wipe{position:fixed;inset:0 -25%;z-index:150;pointer-events:none;display:grid;grid-template-columns:repeat(5,1fr);transform:skewX(-14deg)}
 .wipe i{background:linear-gradient(180deg,var(--accent),#02186E);transform:scaleY(0);transform-origin:bottom}
 .wipe.run i{animation:wipe .8s var(--ease-io) forwards;animation-delay:calc(var(--k) * 30ms)}
+[data-dir="prev"] .wipe.run i{animation-name:wipeBack}
+@keyframes wipeBack{0%{transform:scaleY(0);transform-origin:top}40%{transform:scaleY(1);transform-origin:top}60%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @keyframes wipe{0%{transform:scaleY(0);transform-origin:bottom}40%{transform:scaleY(1);transform-origin:bottom}60%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(0);transform-origin:top}}
 /* content eases in once per page */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
@@ -127,7 +129,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:cent
 .page{max-width:var(--maxw);margin:0 auto;padding:calc(var(--nav-h) + clamp(22px,4vh,40px)) var(--gutter) clamp(76px,10vh,100px)}
 .paged .page{display:none}
 .paged .page.active{display:block;animation:pageIn .6s var(--ease)}
-@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pageIn{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+.paged[data-dir="prev"] .page.active{animation-name:pageInBack}
+@keyframes pageInBack{from{opacity:0;transform:translateY(-40px)}to{opacity:1;transform:none}}
 html:not(.paged) .page + .page{border-top:1px solid var(--line)}
 
 .page-head{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:10px clamp(28px,4.5vw,64px);align-items:end;margin-bottom:clamp(22px,4vh,40px)}
@@ -1316,6 +1320,8 @@ function go(id){
   let i = ids.indexOf(id);
   if (i < 0) i = 0;
   if (i === cur){ window.scrollTo({top:0, behavior:'instant'}); return; }
+  // turning forward slides up, turning back slides down
+  document.documentElement.dataset.dir = i < cur ? 'prev' : 'next';
   if (cur < 0 || reduce){ show(i); return; }
   /* sweep the wipe over the screen, swap pages while it covers */
   clearTimeout(swapTimer);
@@ -1330,6 +1336,72 @@ addEventListener('hashchange', () => go(location.hash.slice(1)));
 hudPrev.addEventListener('click', () => step(-1));
 hudNext.addEventListener('click', () => step(1));
 go(location.hash.slice(1));
+
+/* ---------- vertical flip: scroll or swipe past the end of a page to turn it ----------
+   A long page scrolls normally. Only a gesture that starts at the top or bottom edge
+   turns the page, so reaching the end mid-scroll never skips ahead by accident. */
+{
+  const EDGE = 2;
+  const atTop = () => scrollY <= EDGE;
+  const atBottom = () => scrollY + innerHeight >= document.documentElement.scrollHeight - EDGE;
+  const blocked = () => !!document.querySelector('dialog[open], .lb.open');
+  let lockUntil = 0;
+  function flip(d){
+    const now = performance.now();
+    if (now < lockUntil) return false;
+    const i = cur + d;
+    if (i < 0 || i >= pages.length) return false;
+    lockUntil = now + 1000;
+    step(d);
+    return true;
+  }
+
+  // wheel and trackpad: one gesture = a run of events less than 200ms apart.
+  // At the edge the page resists: about two mouse-wheel notches or one trackpad swipe turn it.
+  let lastWheel = 0, armed = false, acc = 0;
+  addEventListener('wheel', e => {
+    if (e.ctrlKey || blocked() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    const now = performance.now();
+    const d = Math.sign(e.deltaY);
+    if (!d) return;
+    const atEdge = d > 0 ? atBottom() : atTop();
+    if (now - lastWheel > 200) armed = atEdge;
+    if (now - lastWheel > 800 || !atEdge || Math.sign(acc) !== d) acc = 0;
+    lastWheel = now;
+    if (!atEdge){ armed = false; return; }
+    if (!armed) return;
+    acc += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+    // the rest of this gesture's momentum is spent once the page turns
+    if (Math.abs(acc) > 150 && flip(d)){ armed = false; acc = 0; }
+  }, {passive:true});
+
+  // touch: a vertical swipe that starts at the edge it moves past
+  let t0 = null;
+  addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || blocked()){ t0 = null; return; }
+    const t = e.touches[0];
+    t0 = {x:t.clientX, y:t.clientY, top:atTop(), bottom:atBottom(), time:performance.now()};
+  }, {passive:true});
+  addEventListener('touchend', e => {
+    if (!t0 || blocked()) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - t0.x, dy = t0.y - t.clientY;
+    const quick = performance.now() - t0.time < 900;
+    if (quick && Math.abs(dy) > 60 && Math.abs(dy) > Math.abs(dx) * 1.5){
+      if (dy > 0 && t0.bottom && atBottom()) flip(1);
+      if (dy < 0 && t0.top && atTop()) flip(-1);
+    }
+    t0 = null;
+  }, {passive:true});
+
+  // keys: down / page down at the bottom turn forward, up / page up at the top turn back
+  addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || blocked()) return;
+    if (e.target.closest?.('input, textarea, select, [contenteditable]')) return;
+    if ((e.key === 'ArrowDown' || e.key === 'PageDown') && atBottom() && flip(1)) e.preventDefault();
+    if ((e.key === 'ArrowUp' || e.key === 'PageUp') && atTop() && flip(-1)) e.preventDefault();
+  });
+}
 
 /* ---------- project proof side panel ---------- */
 const proofDrawer = document.getElementById('proofDrawer');
