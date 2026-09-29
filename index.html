@@ -14,6 +14,8 @@
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
+<!-- deck mode: one page at a time, each a card (without JS every page stacks in one scroll) -->
+<script>document.documentElement.classList.add('cards');</script>
 <style>
 /* =====================================================================
    TOKENS — cobalt on cream, sun yellow for positive outcomes
@@ -71,7 +73,6 @@ button{font:inherit;background:none;border:0;color:inherit;cursor:pointer}
 /* =====================================================================
    SECTION RAIL — a vertical line on the right, one number per page
    ===================================================================== */
-html{scroll-behavior:smooth;scroll-snap-type:y proximity}
 .rail{position:fixed;right:clamp(10px,1.8vw,28px);top:50%;translate:0 -50%;z-index:55;display:flex;flex-direction:column;align-items:flex-end;gap:18px}
 .rail-list{position:relative;padding-right:1px}
 .rail-track{position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--line-2)}
@@ -100,13 +101,22 @@ html{scroll-behavior:smooth;scroll-snap-type:y proximity}
   .rail.scrolling a[aria-current] .n{opacity:1}
   .rail-mail{display:none!important}
 }
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
 
 /* =====================================================================
    PAGE FRAME
    ===================================================================== */
-.page{max-width:var(--maxw);min-height:100vh;min-height:100svh;margin:0 auto;padding:clamp(28px,5vh,48px) var(--gutter) clamp(76px,10vh,100px);scroll-snap-align:start}
+.page{max-width:var(--maxw);min-height:100vh;min-height:100svh;margin:0 auto;padding:clamp(28px,5vh,48px) var(--gutter) clamp(76px,10vh,100px)}
 .page + .page{border-top:1px solid var(--line)}
+/* deck: every page is a full-screen card that scrolls on its own. Turning forward, the next card slides up over
+   this one while it sinks back into the deck; turning back, the top card drops away. */
+.cards body{overflow:hidden}
+.cards .page{position:fixed;inset:0;z-index:1;display:none;max-width:none;height:100vh;height:100dvh;min-height:0;padding-inline:max(var(--gutter),calc(50% - var(--maxw) / 2 + var(--gutter)));border:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth;outline:none;transition:background-color .4s}
+.cards .page.active{display:block}
+.cards .page.moving{background-color:var(--bg);border-radius:22px 22px 0 0}
+.cards .page.moving .reveal{transition:none}
+.cards .page.moving.over{box-shadow:0 -30px 80px -30px rgba(11,19,48,.4)}
+@media (prefers-reduced-motion:reduce){.cards .page{scroll-behavior:auto}}
 
 .page-head{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr);gap:10px clamp(28px,4.5vw,64px);align-items:end;margin-bottom:clamp(22px,4vh,40px)}
 h2{font-weight:650;font-size:clamp(26px,2.6vw,36px);color:var(--white);letter-spacing:-.03em;line-height:1.1}
@@ -215,7 +225,8 @@ h1.split .ch.sp{width:.26em}
 /* =====================================================================
    02 — WORK : three project cards, sections aligned across cards
    ===================================================================== */
-.proj{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(6,auto);column-gap:var(--gap)}
+.proj{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(12,auto);column-gap:var(--gap)}
+.pc:nth-child(n+3){margin-top:var(--gap)} /* second row of cards */
 .pc{grid-row:span 6;display:grid;grid-template-rows:subgrid;border:1px solid var(--line);background:rgba(255,255,255,.94);transition:border-color .3s}
 .pc:hover{border-color:var(--line-2)}
 .pc > *{padding:12px 20px;border-top:1px solid var(--line)}
@@ -308,7 +319,7 @@ h1.split .ch.sp{width:.26em}
 @keyframes proofIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:1000px){.proof-drawer{max-height:100dvh}.proof-drawer-head,.proof-drawer-body{padding:18px}}
 @media(prefers-reduced-motion:reduce){.proof-drawer[open]{animation:none}}
-@media (max-width:1000px){.proj{grid-template-columns:1fr;row-gap:var(--gap)}}
+@media (max-width:1000px){.proj{grid-template-columns:1fr;row-gap:var(--gap)}.pc:nth-child(n+3){margin-top:0}}
 
 /* =====================================================================
    03 — FIT
@@ -661,7 +672,7 @@ h1.split .ch.sp{width:.26em}
 <section class="page" id="work" data-name="work" data-title="What did I do, and what did it change?">
   <header class="page-head reveal">
     <h2>What did I do, and what did it change?</h2>
-    <p class="point">Three projects, same layout: the result first, then the problem, how I did it and what I owned.</p>
+    <p class="point">Four projects, same layout: the result first, then the problem, how I did it and what I owned.</p>
   </header>
 
   <div class="proj reveal" data-d="1">
@@ -753,6 +764,32 @@ h1.split .ch.sp{width:.26em}
           <img src="spaca-1.jpg" alt="Spaca landing page" loading="lazy">
           <span class="proof-site-cap"><span>Landing page · early-access waitlist</span><em>Visit spaca.xyz ↗</em></span>
         </a>
+      </div>
+    </article>
+
+    <!-- LOCKABOX -->
+    <article class="pc">
+      <header class="pc-head">
+        <div class="pc-mark logo-fit"><img src="lockabox-logo.svg" alt="Lockabox logo" width="48" height="48"></div>
+        <div><h3>Lockabox</h3><div class="meta">Founder, built with AI agents · Sep 2026 — now</div></div>
+      </header>
+      <div class="pc-res">
+        <b><span data-count="62">62</span>/89</b>
+        <p>acceptance checks passed<small>local build, not public yet</small></p>
+      </div>
+      <div class="pc-prob"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></svg>problem</span><p>Finding a new memecoin means screeners and paid hype. Growth can't pay for posts either: X bans apps that reward posting from Jan 2026.</p></div>
+      <div class="pc-how"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 6h9"/><path d="M11 12h9"/><path d="M11 18h9"/><path d="m3.5 6 1.5 1.5L8 4.5"/><path d="m3.5 12 1.5 1.5L8 10.5"/><path d="m3.5 18 1.5 1.5L8 16.5"/></svg>how</span><ol>
+        <li><b>10</b><span>ground rules: free rolls, no fake FOMO, no profit promises</span></li>
+        <li><b>3</b><span>growth loops: shareable pulls, invites, sponsored boxes</span></li>
+        <li><b>11</b><span>brand rounds before the final look</span></li>
+      </ol></div>
+      <div class="pc-own"><span class="k"><svg class="ic ic-k" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="1.5"/><path d="M8 7V4.5h8V7"/><path d="M3 13h18"/></svg>owned</span><p>product spec · positioning · brand · growth loops · compliance rules · AI build workflow</p></div>
+      <div class="pc-proof" data-peek="Brand rounds 1, 6 and 11 (design mockups)">
+        <div class="thumbs" data-gallery>
+        <a href="#" data-lb-src="lab-1.jpg" data-lb-cap="Lockabox — round 11, the chosen look: roll a case, get a memecoin (design mockup, sample data)"><img src="lab-1.jpg" alt="Lockabox round 11 design: a case opening reel of memecoins" loading="lazy"></a>
+        <a href="#" data-lb-src="lab-2.jpg" data-lb-cap="Lockabox — round 6: trending case with proof of roll (design mockup, sample data)"><img src="lab-2.jpg" alt="Lockabox round 6 design: Solana trending case" loading="lazy"></a>
+        <a href="#" data-lb-src="lab-3.jpg" data-lb-cap="Lockabox — round 1: two brand directions, Neon Gremlin and Gold Rush"><img src="lab-3.jpg" alt="Lockabox round 1: two brand directions" loading="lazy"></a>
+      </div>
       </div>
     </article>
 
@@ -1208,59 +1245,145 @@ function scatterPhotos(shoot){
 addEventListener('resize', () => { if (scatter.clientWidth && scatter.clientWidth !== scatterW) scatterPhotos(false); });
 
 /* ============================================================
-   SECTIONS — one long scroll, the rail marks where you are
+   DECK — one page at a time, like a stack of cards. A page scrolls on its own;
+   scrolling, swiping or pressing a key past its end flips to the next card.
    ============================================================ */
 const pages = [...document.querySelectorAll('.page')];
+const ids = pages.map(p => p.id);
 const railLinks = [...document.querySelectorAll('#rail ol a')];
 const railFill = document.getElementById('railFill');
-let cur = -1;
+const rail = document.getElementById('rail');
+let cur = -1, busy = false, queued = -1;
+pages.forEach(p => p.tabIndex = -1);  // focusable, so arrow keys scroll the open card
 
-/* a page's entrance animations run the first time it scrolls into view */
-const seen = new IntersectionObserver(es => es.forEach(e => {
-  if (e.isIntersecting){ e.target.classList.add('active'); seen.unobserve(e.target); }
-}));
-pages.forEach(p => seen.observe(p));
-
-function setCurrent(i){
-  if (i === cur) return;
-  cur = i;
+/* the rail fills as you go: pages turned, plus how far down the open one you are */
+function progress(){
+  const p = pages[cur];
+  const max = p.scrollHeight - p.clientHeight;
+  railFill.style.height = ((cur + (max > 0 ? p.scrollTop / max : 1)) / pages.length * 100) + '%';
+}
+function settle(i){
   railLinks.forEach((a, k) => k === i ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current'));
   document.title = (i ? pages[i].dataset.name + ' — ' : '') + 'Do Hoang Phi — Performance → Growth Marketing';
   setPalette(i);
   if (i === 0) typeTitle();
-  history.replaceState(null, '', i ? '#' + pages[i].id : location.pathname + location.search);
+  if (pages[i].contains(scatter)) scatterPhotos(true);
+  lifeClip(pages[i].contains(scatter));
+  progress();
 }
-/* the current page is the one crossing a line 40% down the screen */
-let ticking = false;
-function track(){
-  ticking = false;
-  const line = innerHeight * .4;
-  let i = 0;
-  pages.forEach((p, k) => { if (p.getBoundingClientRect().top <= line) i = k; });
-  setCurrent(i);
-  const max = document.documentElement.scrollHeight - innerHeight;
-  railFill.style.height = (max > 0 ? Math.min(scrollY / max, 1) * 100 : 0) + '%';
+/* dir 1: the next card slides up over this one · dir -1: this card drops away · 0: no animation */
+function show(i, dir){
+  if (busy){ queued = i; return; }
+  if (i === cur) return;
+  const from = pages[cur], to = pages[i];
+  cur = i;
+  to.classList.add('active');
+  /* turning back lands at the end of the earlier card, where you left it */
+  to.scrollTo({top: dir < 0 ? to.scrollHeight : 0, behavior:'instant'});
+  /* what shows when the card lands is already there as it slides in; the rest reveals as you scroll */
+  const box = to.getBoundingClientRect();
+  to.querySelectorAll('.reveal:not(.in)').forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (r.bottom > box.top && r.top < box.bottom){ el.classList.add('in'); io.unobserve(el); }
+  });
+  to.focus({preventScroll:true});
+  settle(i);
+  if (!from || !dir || reduce){ if (from) from.classList.remove('active'); return; }
+  busy = true;
+  const over = dir > 0 ? to : from, under = dir > 0 ? from : to;
+  over.classList.add('moving', 'over'); under.classList.add('moving');
+  over.style.zIndex = 3; under.style.zIndex = 2;
+  const opts = {duration:750, easing:'cubic-bezier(.76,0,.24,1)', fill:'both'};
+  const up = [{transform:'translateY(100%)'}, {transform:'none'}];
+  const sunk = [{transform:'none', opacity:1}, {transform:'translateY(-3%) scale(.92)', opacity:.35}];
+  const runs = [over.animate(dir > 0 ? up : [...up].reverse(), opts), under.animate(dir > 0 ? sunk : [...sunk].reverse(), opts)];
+  Promise.all(runs.map(a => a.finished)).then(() => {
+    runs.forEach(a => a.cancel());
+    from.classList.remove('active');
+    [over, under].forEach(p => { p.classList.remove('moving', 'over'); p.style.zIndex = ''; });
+    busy = false;
+    if (queued >= 0){ const q = queued; queued = -1; show(q, Math.sign(q - cur)); }
+  });
 }
-const rail = document.getElementById('rail');
-let idle = 0;
-addEventListener('scroll', () => {
-  if (!ticking){ ticking = true; requestAnimationFrame(track); }
-  rail.classList.add('scrolling');
-  clearTimeout(idle); idle = setTimeout(() => rail.classList.remove('scrolling'), 1200);
-}, {passive:true});
-addEventListener('resize', track);
-/* a link like hoangphi.xyz/#work opens at that page */
-const startAt = location.hash && document.getElementById(location.hash.slice(1));
-if (startAt) startAt.scrollIntoView({behavior:'instant'});
-track();
+/* #work turns to that page; a link to something inside a page (the hero's #fit) scrolls that card to it */
+function go(id, instant){
+  const el = id && document.getElementById(id);
+  const i = Math.max(0, el ? pages.findIndex(p => p.contains(el)) : 0);
+  show(i, instant || cur < 0 ? 0 : Math.sign(i - cur));
+  if (el && el !== pages[i]) el.scrollIntoView({behavior: instant ? 'instant' : 'smooth'});
+}
+addEventListener('hashchange', () => go(location.hash.slice(1)));
+go(location.hash.slice(1), true);
 
-/* life: the photos wait in a pile until the page scrolls into view, then fly apart; the gym clip plays only while it is on screen */
-scatterPhotos(false);
-if (!reduce) scatter.classList.add('pile');
-new IntersectionObserver(([e]) => {
-  if (e.intersectionRatio >= .3 && !scatter._shown){ scatter._shown = true; scatterPhotos(true); lifeClip(true); }
-  else if (!e.isIntersecting && scatter._shown){ scatter._shown = false; lifeClip(false); }
-}, {threshold:[0, .3]}).observe(scatter);
+{
+  const EDGE = 2;
+  const atTop = () => pages[cur].scrollTop <= EDGE;
+  const atBottom = () => { const p = pages[cur]; return p.scrollTop + p.clientHeight >= p.scrollHeight - EDGE; };
+  const blocked = () => !!document.querySelector('dialog[open], .lb.open');
+  let lockUntil = 0;
+  function flip(d){
+    const now = performance.now(), i = cur + d;
+    if (busy || now < lockUntil || i < 0 || i >= pages.length) return false;
+    lockUntil = now + 900;
+    location.hash = ids[i];
+    return true;
+  }
+
+  /* wheel and trackpad: one gesture = a run of events less than 200ms apart. Only a gesture that starts with the
+     card already resting at the edge turns it, so reaching the end mid-scroll never skips ahead (the notch that
+     arrives there only arrives), and once it turns, the rest of that gesture's momentum is spent. */
+  let lastWheel = 0, armed = false, acc = 0, sawEdge = 0, lastMove = 0;
+  addEventListener('wheel', e => {
+    if (e.ctrlKey || blocked() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    const now = performance.now(), d = Math.sign(e.deltaY);
+    if (!d) return;
+    const atEdge = d > 0 ? atBottom() : atTop();
+    /* resting = seen at this edge by the last wheel event, or not scrolled for a moment (got there by keys or scrollbar) */
+    if (now - lastWheel > 200){ armed = atEdge && (sawEdge === d || now - lastMove > 300); acc = 0; }
+    sawEdge = atEdge ? d : 0;
+    lastWheel = now;
+    if (!atEdge){ armed = false; return; }
+    if (!armed) return;
+    acc += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+    if (Math.abs(acc) > 50 && flip(d)) armed = false;
+  }, {passive:true});
+
+  /* touch: a quick vertical swipe that starts at the edge it moves past */
+  let t0 = null;
+  addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || blocked()){ t0 = null; return; }
+    const t = e.touches[0];
+    t0 = {x:t.clientX, y:t.clientY, top:atTop(), bottom:atBottom(), time:performance.now()};
+  }, {passive:true});
+  addEventListener('touchend', e => {
+    if (!t0 || blocked()) return;
+    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t0.y - t.clientY;
+    if (performance.now() - t0.time < 900 && Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5){
+      if (dy > 0 && t0.bottom && atBottom()) flip(1);
+      if (dy < 0 && t0.top && atTop()) flip(-1);
+    }
+    t0 = null;
+  }, {passive:true});
+
+  /* keys: down, page down or space at the end turn forward; up or page up at the top turn back */
+  addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey || blocked()) return;
+    if (e.target.closest?.('input, textarea, select, button, [contenteditable]')) return;
+    if (['ArrowDown', 'PageDown', ' '].includes(e.key) && !e.shiftKey && atBottom() && flip(1)) e.preventDefault();
+    if (['ArrowUp', 'PageUp'].includes(e.key) && atTop() && flip(-1)) e.preventDefault();
+  });
+
+  /* scrolling inside a card moves the rail; on phones the current number shows while scrolling */
+  let idle = 0;
+  document.addEventListener('scroll', e => {
+    if (e.target !== pages[cur]) return;
+    lastMove = performance.now();
+    progress();
+    rail.classList.add('scrolling');
+    clearTimeout(idle); idle = setTimeout(() => rail.classList.remove('scrolling'), 1200);
+  }, {capture:true, passive:true});
+  addEventListener('resize', progress);
+}
 
 /* ---------- project proof side panel ---------- */
 const proofDrawer = document.getElementById('proofDrawer');
