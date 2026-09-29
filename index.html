@@ -1293,7 +1293,7 @@ function show(i, dir){
   const over = dir > 0 ? to : from, under = dir > 0 ? from : to;
   over.classList.add('moving', 'over'); under.classList.add('moving');
   over.style.zIndex = 3; under.style.zIndex = 2;
-  const opts = {duration:750, easing:'cubic-bezier(.76,0,.24,1)', fill:'both'};
+  const opts = {duration:600, easing:'cubic-bezier(.76,0,.24,1)', fill:'both'};
   const up = [{transform:'translateY(100%)'}, {transform:'none'}];
   const sunk = [{transform:'none', opacity:1}, {transform:'translateY(-3%) scale(.92)', opacity:.35}];
   const runs = [over.animate(dir > 0 ? up : [...up].reverse(), opts), under.animate(dir > 0 ? sunk : [...sunk].reverse(), opts)];
@@ -1324,46 +1324,53 @@ go(location.hash.slice(1), true);
   function flip(d){
     const now = performance.now(), i = cur + d;
     if (busy || now < lockUntil || i < 0 || i >= pages.length) return false;
-    lockUntil = now + 900;
+    lockUntil = now + 700;
     location.hash = ids[i];
     return true;
   }
 
-  /* wheel and trackpad: one gesture = a run of events less than 200ms apart. Only a gesture that starts with the
-     card already resting at the edge turns it, so reaching the end mid-scroll never skips ahead (the notch that
-     arrives there only arrives), and once it turns, the rest of that gesture's momentum is spent. */
-  let lastWheel = 0, armed = false, acc = 0, sawEdge = 0, lastMove = 0;
+  /* A card turns with a light push once it is resting at an edge. "Resting" is judged from scroll events, so the
+     push that carries a card to its end only gets it there; the next push turns it. A card that just landed
+     rests at the edge it landed on. */
+  let edgeAt = 0, edgeCard = null;
+  const resting = () => edgeCard !== pages[cur] || edgeAt > 0;
+
+  /* wheel and trackpad: a new push is a pause (a mouse notch, a new swipe) or a step clearly above the last few
+     steps. Trackpad momentum only ever slows down, give or take the odd split or merged event, so it never turns a
+     card by itself, and a fresh swipe on top of it still does. */
+  let lastWheel = 0, recent = [], armed = false, acc = 0;
   addEventListener('wheel', e => {
     if (e.ctrlKey || blocked() || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-    const now = performance.now(), d = Math.sign(e.deltaY);
+    const now = performance.now(), dy = e.deltaY * (e.deltaMode === 1 ? 16 : 1), d = Math.sign(dy);
     if (!d) return;
-    const atEdge = d > 0 ? atBottom() : atTop();
-    /* resting = seen at this edge by the last wheel event, or not scrolled for a moment (got there by keys or scrollbar) */
-    if (now - lastWheel > 200){ armed = atEdge && (sawEdge === d || now - lastMove > 300); acc = 0; }
-    sawEdge = atEdge ? d : 0;
+    const abs = Math.abs(dy);
+    if (now - lastWheel > 250) recent = [];
+    const fresh = !recent.length || abs > Math.max(...recent) * 1.3 + 2;
+    recent.push(abs); if (recent.length > 5) recent.shift();
     lastWheel = now;
-    if (!atEdge){ armed = false; return; }
+    if (!(d > 0 ? atBottom() : atTop()) || !resting()){ armed = false; acc = 0; return; }
+    if (fresh && !armed){ armed = true; acc = 0; }
     if (!armed) return;
-    acc += e.deltaY * (e.deltaMode === 1 ? 16 : 1);
-    if (Math.abs(acc) > 50 && flip(d)) armed = false;
+    if (Math.sign(acc) === -d) acc = 0;
+    acc += dy;
+    if (Math.abs(acc) > 24 && flip(d)){ armed = false; acc = 0; }
   }, {passive:true});
 
-  /* touch: a quick vertical swipe that starts at the edge it moves past */
+  /* touch: once the card is at its edge, the finger travelling 36px further turns it, right away, mid-swipe.
+     A flick that coasts to the end after the finger lifts only gets there. */
   let t0 = null;
   addEventListener('touchstart', e => {
     if (e.touches.length !== 1 || blocked()){ t0 = null; return; }
-    const t = e.touches[0];
-    t0 = {x:t.clientX, y:t.clientY, top:atTop(), bottom:atBottom(), time:performance.now()};
+    t0 = {x:e.touches[0].clientX, y:e.touches[0].clientY};
   }, {passive:true});
-  addEventListener('touchend', e => {
-    if (!t0 || blocked()) return;
-    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t0.y - t.clientY;
-    if (performance.now() - t0.time < 900 && Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx) * 1.5){
-      if (dy > 0 && t0.bottom && atBottom()) flip(1);
-      if (dy < 0 && t0.top && atTop()) flip(-1);
-    }
-    t0 = null;
+  addEventListener('touchmove', e => {
+    if (!t0 || blocked() || e.touches.length !== 1) return;
+    const t = e.touches[0], dx = t.clientX - t0.x, dy = t0.y - t.clientY, d = Math.sign(dy);
+    /* while the card is still scrolling, measure from where the finger is now */
+    if (!d || !(d > 0 ? atBottom() : atTop())){ t0 = {x:t.clientX, y:t.clientY}; return; }
+    if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx) * 1.2 && flip(d)) t0 = null;
   }, {passive:true});
+  addEventListener('touchend', () => { t0 = null; }, {passive:true});
 
   /* keys: down, page down or space at the end turn forward; up or page up at the top turn back */
   addEventListener('keydown', e => {
@@ -1377,7 +1384,8 @@ go(location.hash.slice(1), true);
   let idle = 0;
   document.addEventListener('scroll', e => {
     if (e.target !== pages[cur]) return;
-    lastMove = performance.now();
+    edgeCard = pages[cur];
+    edgeAt = atTop() || atBottom() ? edgeAt || performance.now() : 0;
     progress();
     rail.classList.add('scrolling');
     clearTimeout(idle); idle = setTimeout(() => rail.classList.remove('scrolling'), 1200);
